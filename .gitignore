@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# .NET build output
+**/obj/
+**/bin/
+
+# Aider
+.aider*
+
+# Environment
+.env
+*.env.local
