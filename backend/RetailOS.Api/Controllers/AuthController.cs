@@ -29,19 +29,24 @@ public class AuthController : ControllerBase
         if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
             return Unauthorized("Invalid credentials.");
 
-        var token = GenerateJwtToken(user);
-        return Ok(new AuthResponse(token, user.Email!, user.Role ?? "User", user.FullName));
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.FirstOrDefault() ?? "User";
+        var token = GenerateJwtToken(user, role);
+        return Ok(new AuthResponse(token, user.Email!, role, user.FullName));
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        var user = new ApplicationUser { UserName = request.Email, Email = request.Email, FullName = request.FullName, Role = "User" };
-        
-        // For demonstration, let's make the first user an Admin
-        if (!_userManager.Users.Any()) user.Role = "Admin";
-        
+        var user = new ApplicationUser { UserName = request.Email, Email = request.Email, FullName = request.FullName };
         var result = await _userManager.CreateAsync(user, request.Password);
+        
+        if (result.Succeeded)
+        {
+            // For demonstration, let's make the first user an Admin
+            var isFirstUser = _userManager.Users.Count() == 1;
+            await _userManager.AddToRoleAsync(user, isFirstUser ? "Admin" : "User");
+        }
         if (!result.Succeeded) return BadRequest(result.Errors);
 
         return Ok("User registered successfully");
@@ -57,12 +62,15 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null) return NotFound("User not found.");
 
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.FirstOrDefault() ?? "User";
+
         return Ok(new
         {
             user.Id,
             user.Email,
             user.FullName,
-            user.Role
+            Role = role
         });
     }
 
@@ -101,18 +109,21 @@ public class AuthController : ControllerBase
             { 
                 UserName = fakeEmail, 
                 Email = fakeEmail, 
-                FullName = $"{request.Provider} User",
-                Role = "User"
+                FullName = $"{request.Provider} User"
             };
             var createResult = await _userManager.CreateAsync(user);
             if(!createResult.Succeeded) return BadRequest("Could not create user for external login.");
+            await _userManager.AddToRoleAsync(user, "User");
         }
 
-        var jwt = GenerateJwtToken(user);
-        return Ok(new AuthResponse(jwt, user.Email!, user.Role ?? "User", user.FullName));
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.FirstOrDefault() ?? "User";
+
+        var jwt = GenerateJwtToken(user, role);
+        return Ok(new AuthResponse(jwt, user.Email!, role, user.FullName));
     }
 
-    private string GenerateJwtToken(ApplicationUser user)
+    private string GenerateJwtToken(ApplicationUser user, string role)
     {
         var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key config is missing");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
@@ -124,7 +135,7 @@ public class AuthController : ControllerBase
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.Email, user.Email!),
-            new Claim(ClaimTypes.Role, user.Role ?? "User")
+            new Claim(ClaimTypes.Role, role)
         };
 
         var token = new JwtSecurityToken(
