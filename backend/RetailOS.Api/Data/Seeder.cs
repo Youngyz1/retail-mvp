@@ -11,7 +11,8 @@ public static class Seeder
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
         await context.Database.MigrateAsync();
 
         string[] roles = { "Admin", "Manager", "Cashier", "User" };
@@ -20,6 +21,41 @@ public static class Seeder
             if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        // Create test users if they don't exist
+        var adminEmail = "admin@retailos.com";
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                FullName = "Admin User"
+            };
+            var adminResult = await userManager.CreateAsync(adminUser, "Admin@123456");
+            if (adminResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
+
+        var userEmail = "user@retailos.com";
+        var testUser = await userManager.FindByEmailAsync(userEmail);
+        if (testUser == null)
+        {
+            testUser = new ApplicationUser
+            {
+                UserName = userEmail,
+                Email = userEmail,
+                FullName = "Test User"
+            };
+            var userResult = await userManager.CreateAsync(testUser, "User@123456");
+            if (userResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(testUser, "User");
             }
         }
 
