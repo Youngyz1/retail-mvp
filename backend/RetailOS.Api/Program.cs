@@ -99,4 +99,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/", () => "RetailOS API is running.");
+
 app.Run();
