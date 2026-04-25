@@ -45,8 +45,8 @@ jobs:
 
     - name: Deploy to GKE
       run: |
-        kubectl apply -f frontend-deployment.yaml
-        kubectl apply -f backend-deployment.yaml
-        kubectl apply -f ingress.yaml
+        kubectl apply -f k8s/frontend-deployment.yaml
+        kubectl apply -f k8s/backend-deployment.yaml
+        kubectl apply -f k8s/ingress.yaml
         kubectl rollout status deployment/frontend -n retail-app
         kubectl rollout status deployment/backend -n retail-app
