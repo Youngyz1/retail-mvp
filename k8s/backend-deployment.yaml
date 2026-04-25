@@ -16,7 +16,7 @@ spec:
       serviceAccountName: gke-app-ksa
       containers:
       - name: backend
-        image: nginx
+        image: us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:latest
         ports:
         - containerPort: 5000
         env:
@@ -45,4 +45,5 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
+
 
