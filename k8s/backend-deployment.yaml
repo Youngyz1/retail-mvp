@@ -18,7 +18,7 @@ spec:
       - name: backend
         image: nginx
         ports:
-        - containerPort: 5000
+        - containerPort: 8080
         env:
         - name: DB_PASSWORD
           valueFrom:
@@ -35,6 +35,8 @@ spec:
           value: "RetailOS.Api"
         - name: Jwt__Audience
           value: "RetailOS.Client"
+        - name: ASPNETCORE_URLS
+          value: "http://0.0.0.0:8080"
       - name: cloud-sql-proxy
         image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
         args:
@@ -50,3 +52,5 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
+
+
