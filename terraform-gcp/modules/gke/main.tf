@@ -46,7 +46,7 @@ resource "google_container_node_pool" "primary_nodes" {
     disk_size_gb    = 50
     disk_type       = "pd-standard"
     service_account = var.gke_sa_email
-    oauth_scopes = ["https://www.googleapis.com/auth/logging.write", "https://www.googleapis.com/auth/monitoring"]
+    oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 
   initial_node_count = 2
@@ -61,3 +61,4 @@ resource "google_container_node_pool" "primary_nodes" {
     auto_upgrade = true
   }
 }
+
