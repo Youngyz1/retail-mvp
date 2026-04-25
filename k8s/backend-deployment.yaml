@@ -21,11 +21,17 @@ spec:
         - containerPort: 8080
         env:
         - name: DATABASE_URL
-          value: "postgresql://app_user:super-secure-password@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable"
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: database-url
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
         - name: Jwt__Key
-          value: "ThisIsAVerySecretKeyThatNeedsToBeLongEnoughForHMAC256"
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: jwt-key
         - name: Jwt__Issuer
           value: "RetailOS.Api"
         - name: Jwt__Audience
@@ -46,7 +52,3 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
-
-
-
-
