@@ -34,6 +34,7 @@ spec:
         image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
         args:
         - "--structured-logs"
+        - "--private-ip"
         - "--port=5432"
         - "retail-mvp-dev:us-central1:postgres-instance"
         securityContext:
@@ -45,5 +46,7 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
+
+
 
 
