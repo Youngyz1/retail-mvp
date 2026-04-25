@@ -28,7 +28,8 @@ if (!string.IsNullOrEmpty(databaseUrl))
     // Convert postgresql://user:pass@host:port/dbname to Npgsql connection string
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
-    var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={userInfo[0]};Password={userInfo[1]};";
+    var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? (userInfo.Length > 1 ? userInfo[1] : "");
+    var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={userInfo[0]};Password={dbPassword};SSL Mode=Disable;Trust Server Certificate=true;Gss Encryption Mode=Disable;";
     builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 }
 else

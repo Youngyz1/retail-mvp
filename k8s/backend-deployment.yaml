@@ -18,15 +18,10 @@ spec:
       - name: backend
         image: nginx
         ports:
-        - containerPort: 8080
+        - containerPort: 5000
         env:
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: password
         - name: DATABASE_URL
-          value: "postgresql://app_user@127.0.0.1:5432/app_db"
+          value: "postgresql://app_user:super-secure-password@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable"
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
         - name: Jwt__Key
@@ -35,8 +30,6 @@ spec:
           value: "RetailOS.Api"
         - name: Jwt__Audience
           value: "RetailOS.Client"
-        - name: ASPNETCORE_URLS
-          value: "http://0.0.0.0:8080"
       - name: cloud-sql-proxy
         image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
         args:
@@ -52,5 +45,4 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
-
 
