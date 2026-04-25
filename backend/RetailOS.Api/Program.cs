@@ -9,8 +9,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Force the web host to listen on port 5000 on all network interfaces
-builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
 // Add services to the container.
 builder.Services.AddControllers()

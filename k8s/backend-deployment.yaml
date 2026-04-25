@@ -18,7 +18,7 @@ spec:
       - name: backend
         image: us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:latest
         ports:
-        - containerPort: 5000
+        - containerPort: 8080
         env:
         - name: DATABASE_URL
           value: "postgresql://app_user:super-secure-password@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable"
