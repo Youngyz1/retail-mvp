@@ -31,3 +31,7 @@ module "iam" {
   source     = "../../modules/iam"
   project_id = var.project_id
 }
+
+module "armor" {
+  source = "../../modules/armor"
+}
