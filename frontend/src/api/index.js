@@ -1,6 +1,6 @@
 import axios from 'axios';
 // API base URL - set REACT_APP_API_URL env var to override for Docker/production
-const BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const BASE = process.env.REACT_APP_API_URL || '/api';
 const api  = axios.create({ baseURL: BASE });
 
 // Add a request interceptor to attach JWT token
@@ -78,3 +78,4 @@ export const usersApi = {
 };
 
 export default api;
+
