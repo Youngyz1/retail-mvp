@@ -55,7 +55,7 @@ public class DashboardController : ControllerBase
             .GroupBy(o => o.Channel)
             .ToDictionaryAsync(g => g.Key, g => g.Count());
 
-        var sixMonthsAgo = new DateTime(today.Year, today.Month, 1).AddMonths(-5);
+        var sixMonthsAgo = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-5);
         var recentOrdersForChart = await _context.Orders
             .Where(o => o.CreatedAt >= sixMonthsAgo && o.Status != "Cancelled")
             .Include(o => o.Items)
