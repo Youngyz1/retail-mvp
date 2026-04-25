@@ -13,7 +13,8 @@ public static class Seeder
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        await context.Database.MigrateAsync();
+        // Use EnsureCreatedAsync for testing on different DB providers without needing separate Migrations folders
+        await context.Database.EnsureCreatedAsync();
 
         string[] roles = { "Admin", "Manager", "Cashier", "User" };
         foreach (var role in roles)

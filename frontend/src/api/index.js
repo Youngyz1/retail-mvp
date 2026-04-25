@@ -1,6 +1,6 @@
 import axios from 'axios';
-// Let's dynamically map the API to port 5000 on the same host serving the React app
-const BASE = process.env.REACT_APP_API_URL || `http://${window.location.hostname}:5000`;
+// API base URL - set REACT_APP_API_URL env var to override for Docker/production
+const BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const api  = axios.create({ baseURL: BASE });
 
 // Add a request interceptor to attach JWT token
@@ -69,6 +69,12 @@ export const purchaseOrdersApi = {
 export const analyticsApi = {
   get:       () => api.get('/analytics'),
   dashboard: () => api.get('/dashboard'),
+};
+export const usersApi = {
+  list:         ()      => api.get('/users/'),
+  create:       (data)  => api.post('/users/', data),
+  update:       (id, d) => api.put(`/users/${id}`, d),
+  updateStatus: (id, d) => api.patch(`/users/${id}/status`, d),
 };
 
 export default api;

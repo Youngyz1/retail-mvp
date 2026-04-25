@@ -8,7 +8,7 @@ namespace RetailOS.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class CategoriesController : ControllerBase
 {
     private readonly AppDbContext _context;

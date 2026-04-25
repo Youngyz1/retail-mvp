@@ -1,0 +1,409 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+
+Terraform will perform the following actions:
+
+[1m  # module.cloudsql.google_sql_database.db[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_database" "db" {
+      [32m+[0m[0m charset         = (known after apply)
+      [32m+[0m[0m collation       = (known after apply)
+      [32m+[0m[0m deletion_policy = "DELETE"
+      [32m+[0m[0m id              = (known after apply)
+      [32m+[0m[0m instance        = "postgres-instance"
+      [32m+[0m[0m name            = "app_db"
+      [32m+[0m[0m project         = "your-gcp-project-id"
+      [32m+[0m[0m self_link       = (known after apply)
+    }
+
+[1m  # module.cloudsql.google_sql_database_instance.postgres[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_database_instance" "postgres" {
+      [32m+[0m[0m available_maintenance_versions = (known after apply)
+      [32m+[0m[0m connection_name                = (known after apply)
+      [32m+[0m[0m database_version               = "POSTGRES_15"
+      [32m+[0m[0m deletion_protection            = false
+      [32m+[0m[0m dns_name                       = (known after apply)
+      [32m+[0m[0m dns_names                      = (known after apply)
+      [32m+[0m[0m encryption_key_name            = (known after apply)
+      [32m+[0m[0m first_ip_address               = (known after apply)
+      [32m+[0m[0m id                             = (known after apply)
+      [32m+[0m[0m instance_type                  = (known after apply)
+      [32m+[0m[0m ip_address                     = (known after apply)
+      [32m+[0m[0m maintenance_version            = (known after apply)
+      [32m+[0m[0m master_instance_name           = (known after apply)
+      [32m+[0m[0m name                           = "postgres-instance"
+      [32m+[0m[0m node_count                     = (known after apply)
+      [32m+[0m[0m private_ip_address             = (known after apply)
+      [32m+[0m[0m project                        = "your-gcp-project-id"
+      [32m+[0m[0m psc_service_attachment_link    = (known after apply)
+      [32m+[0m[0m public_ip_address              = (known after apply)
+      [32m+[0m[0m region                         = "us-central1"
+      [32m+[0m[0m replica_names                  = (known after apply)
+      [32m+[0m[0m root_password_wo               = (write-only attribute)
+      [32m+[0m[0m self_link                      = (known after apply)
+      [32m+[0m[0m server_ca_cert                 = (sensitive value)
+      [32m+[0m[0m service_account_email_address  = (known after apply)
+
+      [32m+[0m[0m replica_configuration (known after apply)
+
+      [32m+[0m[0m replication_cluster (known after apply)
+
+      [32m+[0m[0m settings {
+          [32m+[0m[0m activation_policy           = "ALWAYS"
+          [32m+[0m[0m availability_type           = "REGIONAL"
+          [32m+[0m[0m connector_enforcement       = (known after apply)
+          [32m+[0m[0m data_api_access             = (known after apply)
+          [32m+[0m[0m disk_autoresize             = true
+          [32m+[0m[0m disk_autoresize_limit       = 0
+          [32m+[0m[0m disk_size                   = (known after apply)
+          [32m+[0m[0m disk_type                   = (known after apply)
+          [32m+[0m[0m edition                     = (known after apply)
+          [32m+[0m[0m effective_availability_type = (known after apply)
+          [32m+[0m[0m pricing_plan                = "PER_USE"
+          [32m+[0m[0m tier                        = "db-custom-1-3840"
+          [32m+[0m[0m user_labels                 = (known after apply)
+          [32m+[0m[0m version                     = (known after apply)
+
+          [32m+[0m[0m backup_configuration (known after apply)
+
+          [32m+[0m[0m connection_pool_config (known after apply)
+
+          [32m+[0m[0m data_cache_config (known after apply)
+
+          [32m+[0m[0m insights_config (known after apply)
+
+          [32m+[0m[0m ip_configuration {
+              [32m+[0m[0m ipv4_enabled    = false
+              [32m+[0m[0m private_network = (known after apply)
+              [32m+[0m[0m server_ca_mode  = (known after apply)
+              [32m+[0m[0m ssl_mode        = (known after apply)
+            }
+
+          [32m+[0m[0m location_preference (known after apply)
+
+          [32m+[0m[0m read_pool_auto_scale_config (known after apply)
+        }
+    }
+
+[1m  # module.cloudsql.google_sql_user.user[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_user" "user" {
+      [32m+[0m[0m host                    = (known after apply)
+      [32m+[0m[0m iam_email               = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m instance                = "postgres-instance"
+      [32m+[0m[0m name                    = "app_user"
+      [32m+[0m[0m password                = (sensitive value)
+      [32m+[0m[0m password_wo             = (write-only attribute)
+      [32m+[0m[0m project                 = "your-gcp-project-id"
+      [32m+[0m[0m sql_server_user_details = (known after apply)
+    }
+
+[1m  # module.gke.google_container_cluster.gke[0m will be created
+[0m  [32m+[0m[0m resource "google_container_cluster" "gke" {
+      [32m+[0m[0m autopilot_privileged_admission           = (known after apply)
+      [32m+[0m[0m cluster_ipv4_cidr                        = (known after apply)
+      [32m+[0m[0m datapath_provider                        = (known after apply)
+      [32m+[0m[0m default_max_pods_per_node                = (known after apply)
+      [32m+[0m[0m deletion_protection                      = false
+      [32m+[0m[0m disable_l4_lb_firewall_reconciliation    = false
+      [32m+[0m[0m effective_labels                         = {
+          [32m+[0m[0m "goog-terraform-provisioned" = "true"
+        }
+      [32m+[0m[0m enable_cilium_clusterwide_network_policy = false
+      [32m+[0m[0m enable_fqdn_network_policy               = false
+      [32m+[0m[0m enable_intranode_visibility              = (known after apply)
+      [32m+[0m[0m enable_kubernetes_alpha                  = false
+      [32m+[0m[0m enable_l4_ilb_subsetting                 = (known after apply)
+      [32m+[0m[0m enable_legacy_abac                       = false
+      [32m+[0m[0m enable_multi_networking                  = false
+      [32m+[0m[0m enable_shielded_nodes                    = true
+      [32m+[0m[0m endpoint                                 = (known after apply)
+      [32m+[0m[0m id                                       = (known after apply)
+      [32m+[0m[0m initial_node_count                       = 1
+      [32m+[0m[0m label_fingerprint                        = (known after apply)
+      [32m+[0m[0m location                                 = "us-central1"
+      [32m+[0m[0m logging_service                          = (known after apply)
+      [32m+[0m[0m master_version                           = (known after apply)
+      [32m+[0m[0m monitoring_service                       = (known after apply)
+      [32m+[0m[0m name                                     = "gke-cluster"
+      [32m+[0m[0m network                                  = (known after apply)
+      [32m+[0m[0m networking_mode                          = (known after apply)
+      [32m+[0m[0m node_locations                           = (known after apply)
+      [32m+[0m[0m node_version                             = (known after apply)
+      [32m+[0m[0m operation                                = (known after apply)
+      [32m+[0m[0m private_ipv6_google_access               = (known after apply)
+      [32m+[0m[0m project                                  = (known after apply)
+      [32m+[0m[0m remove_default_node_pool                 = true
+      [32m+[0m[0m self_link                                = (known after apply)
+      [32m+[0m[0m services_ipv4_cidr                       = (known after apply)
+      [32m+[0m[0m subnetwork                               = (known after apply)
+      [32m+[0m[0m terraform_labels                         = {
+          [32m+[0m[0m "goog-terraform-provisioned" = "true"
+        }
+      [32m+[0m[0m tpu_ipv4_cidr_block                      = (known after apply)
+
+      [32m+[0m[0m addons_config (known after apply)
+
+      [32m+[0m[0m anonymous_authentication_config (known after apply)
+
+      [32m+[0m[0m authenticator_groups_config (known after apply)
+
+      [32m+[0m[0m autopilot_cluster_policy_config (known after apply)
+
+      [32m+[0m[0m cluster_autoscaling (known after apply)
+
+      [32m+[0m[0m confidential_nodes (known after apply)
+
+      [32m+[0m[0m control_plane_endpoints_config (known after apply)
+
+      [32m+[0m[0m cost_management_config (known after apply)
+
+      [32m+[0m[0m database_encryption (known after apply)
+
+      [32m+[0m[0m default_snat_status (known after apply)
+
+      [32m+[0m[0m enterprise_config (known after apply)
+
+      [32m+[0m[0m gateway_api_config (known after apply)
+
+      [32m+[0m[0m gke_auto_upgrade_config (known after apply)
+
+      [32m+[0m[0m identity_service_config (known after apply)
+
+      [32m+[0m[0m ip_allocation_policy (known after apply)
+
+      [32m+[0m[0m logging_config (known after apply)
+
+      [32m+[0m[0m master_auth (known after apply)
+
+      [32m+[0m[0m master_authorized_networks_config (known after apply)
+
+      [32m+[0m[0m mesh_certificates (known after apply)
+
+      [32m+[0m[0m monitoring_config (known after apply)
+
+      [32m+[0m[0m node_config (known after apply)
+
+      [32m+[0m[0m node_pool (known after apply)
+
+      [32m+[0m[0m node_pool_auto_config (known after apply)
+
+      [32m+[0m[0m node_pool_defaults (known after apply)
+
+      [32m+[0m[0m notification_config (known after apply)
+
+      [32m+[0m[0m pod_autoscaling (known after apply)
+
+      [32m+[0m[0m rbac_binding_config (known after apply)
+
+      [32m+[0m[0m release_channel (known after apply)
+
+      [32m+[0m[0m security_posture_config (known after apply)
+
+      [32m+[0m[0m service_external_ips_config (known after apply)
+
+      [32m+[0m[0m vertical_pod_autoscaling (known after apply)
+
+      [32m+[0m[0m workload_identity_config {
+          [32m+[0m[0m workload_pool = "your-gcp-project-id.svc.id.goog"
+        }
+    }
+
+[1m  # module.gke.google_container_node_pool.primary_nodes[0m will be created
+[0m  [32m+[0m[0m resource "google_container_node_pool" "primary_nodes" {
+      [32m+[0m[0m cluster                     = (known after apply)
+      [32m+[0m[0m id                          = (known after apply)
+      [32m+[0m[0m initial_node_count          = 2
+      [32m+[0m[0m instance_group_urls         = (known after apply)
+      [32m+[0m[0m location                    = "us-central1"
+      [32m+[0m[0m managed_instance_group_urls = (known after apply)
+      [32m+[0m[0m max_pods_per_node           = (known after apply)
+      [32m+[0m[0m name                        = "primary-node-pool"
+      [32m+[0m[0m name_prefix                 = (known after apply)
+      [32m+[0m[0m node_count                  = (known after apply)
+      [32m+[0m[0m node_locations              = (known after apply)
+      [32m+[0m[0m operation                   = (known after apply)
+      [32m+[0m[0m project                     = "your-gcp-project-id"
+      [32m+[0m[0m version                     = (known after apply)
+
+      [32m+[0m[0m management (known after apply)
+
+      [32m+[0m[0m network_config (known after apply)
+
+      [32m+[0m[0m node_config {
+          [32m+[0m[0m disk_size_gb     = (known after apply)
+          [32m+[0m[0m disk_type        = (known after apply)
+          [32m+[0m[0m effective_taints = (known after apply)
+          [32m+[0m[0m image_type       = (known after apply)
+          [32m+[0m[0m labels           = (known after apply)
+          [32m+[0m[0m local_ssd_count  = (known after apply)
+          [32m+[0m[0m logging_variant  = (known after apply)
+          [32m+[0m[0m machine_type     = "e2-medium"
+          [32m+[0m[0m metadata         = (known after apply)
+          [32m+[0m[0m min_cpu_platform = (known after apply)
+          [32m+[0m[0m oauth_scopes     = [
+              [32m+[0m[0m "https://www.googleapis.com/auth/cloud-platform",
+            ]
+          [32m+[0m[0m preemptible      = false
+          [32m+[0m[0m service_account  = (known after apply)
+          [32m+[0m[0m spot             = false
+
+          [32m+[0m[0m boot_disk (known after apply)
+
+          [32m+[0m[0m confidential_nodes (known after apply)
+
+          [32m+[0m[0m containerd_config (known after apply)
+
+          [32m+[0m[0m gcfs_config (known after apply)
+
+          [32m+[0m[0m guest_accelerator (known after apply)
+
+          [32m+[0m[0m kubelet_config (known after apply)
+
+          [32m+[0m[0m linux_node_config (known after apply)
+
+          [32m+[0m[0m shielded_instance_config (known after apply)
+
+          [32m+[0m[0m windows_node_config (known after apply)
+
+          [32m+[0m[0m workload_metadata_config (known after apply)
+        }
+
+      [32m+[0m[0m node_drain_config (known after apply)
+
+      [32m+[0m[0m upgrade_settings (known after apply)
+    }
+
+[1m  # module.iam.google_project_iam_member.sa_roles[0m will be created
+[0m  [32m+[0m[0m resource "google_project_iam_member" "sa_roles" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = "serviceAccount:gke-app-sa@your-gcp-project-id.iam.gserviceaccount.com"
+      [32m+[0m[0m project = "your-gcp-project-id"
+      [32m+[0m[0m role    = "roles/cloudsql.client"
+    }
+
+[1m  # module.iam.google_service_account.gke_sa[0m will be created
+[0m  [32m+[0m[0m resource "google_service_account" "gke_sa" {
+      [32m+[0m[0m account_id   = "gke-app-sa"
+      [32m+[0m[0m disabled     = false
+      [32m+[0m[0m display_name = "GKE App Service Account"
+      [32m+[0m[0m email        = "gke-app-sa@your-gcp-project-id.iam.gserviceaccount.com"
+      [32m+[0m[0m id           = (known after apply)
+      [32m+[0m[0m member       = "serviceAccount:gke-app-sa@your-gcp-project-id.iam.gserviceaccount.com"
+      [32m+[0m[0m name         = (known after apply)
+      [32m+[0m[0m project      = "your-gcp-project-id"
+      [32m+[0m[0m unique_id    = (known after apply)
+    }
+
+[1m  # module.vpc.google_compute_firewall.allow_internal[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_firewall" "allow_internal" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m destination_ranges = (known after apply)
+      [32m+[0m[0m direction          = (known after apply)
+      [32m+[0m[0m enable_logging     = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "allow-internal"
+      [32m+[0m[0m network            = "gcp-vpc"
+      [32m+[0m[0m priority           = 1000
+      [32m+[0m[0m project            = "your-gcp-project-id"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m source_ranges      = [
+          [32m+[0m[0m "10.0.0.0/16",
+        ]
+
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "1-65535",
+            ]
+          [32m+[0m[0m protocol = "tcp"
+        }
+    }
+
+[1m  # module.vpc.google_compute_global_address.private_ip_address[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_global_address" "private_ip_address" {
+      [32m+[0m[0m address            = (known after apply)
+      [32m+[0m[0m address_type       = "INTERNAL"
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m effective_labels   = {
+          [32m+[0m[0m "goog-terraform-provisioned" = "true"
+        }
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m label_fingerprint  = (known after apply)
+      [32m+[0m[0m name               = "private-ip-address"
+      [32m+[0m[0m network            = (known after apply)
+      [32m+[0m[0m prefix_length      = 16
+      [32m+[0m[0m project            = "your-gcp-project-id"
+      [32m+[0m[0m purpose            = "VPC_PEERING"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m terraform_labels   = {
+          [32m+[0m[0m "goog-terraform-provisioned" = "true"
+        }
+    }
+
+[1m  # module.vpc.google_compute_network.vpc[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_network" "vpc" {
+      [32m+[0m[0m auto_create_subnetworks                   = false
+      [32m+[0m[0m bgp_always_compare_med                    = (known after apply)
+      [32m+[0m[0m bgp_best_path_selection_mode              = (known after apply)
+      [32m+[0m[0m bgp_inter_region_cost                     = (known after apply)
+      [32m+[0m[0m delete_bgp_always_compare_med             = false
+      [32m+[0m[0m delete_default_routes_on_create           = false
+      [32m+[0m[0m gateway_ipv4                              = (known after apply)
+      [32m+[0m[0m id                                        = (known after apply)
+      [32m+[0m[0m internal_ipv6_range                       = (known after apply)
+      [32m+[0m[0m mtu                                       = (known after apply)
+      [32m+[0m[0m name                                      = "gcp-vpc"
+      [32m+[0m[0m network_firewall_policy_enforcement_order = "AFTER_CLASSIC_FIREWALL"
+      [32m+[0m[0m network_id                                = (known after apply)
+      [32m+[0m[0m numeric_id                                = (known after apply)
+      [32m+[0m[0m project                                   = "your-gcp-project-id"
+      [32m+[0m[0m routing_mode                              = (known after apply)
+      [32m+[0m[0m self_link                                 = (known after apply)
+    }
+
+[1m  # module.vpc.google_compute_subnetwork.subnet[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_subnetwork" "subnet" {
+      [32m+[0m[0m allow_subnet_cidr_routes_overlap = (known after apply)
+      [32m+[0m[0m creation_timestamp               = (known after apply)
+      [32m+[0m[0m external_ipv6_prefix             = (known after apply)
+      [32m+[0m[0m fingerprint                      = (known after apply)
+      [32m+[0m[0m gateway_address                  = (known after apply)
+      [32m+[0m[0m id                               = (known after apply)
+      [32m+[0m[0m internal_ipv6_prefix             = (known after apply)
+      [32m+[0m[0m ip_cidr_range                    = "10.0.0.0/16"
+      [32m+[0m[0m ipv6_cidr_range                  = (known after apply)
+      [32m+[0m[0m ipv6_gce_endpoint                = (known after apply)
+      [32m+[0m[0m name                             = "gcp-subnet"
+      [32m+[0m[0m network                          = (known after apply)
+      [32m+[0m[0m private_ip_google_access         = (known after apply)
+      [32m+[0m[0m private_ipv6_google_access       = (known after apply)
+      [32m+[0m[0m project                          = "your-gcp-project-id"
+      [32m+[0m[0m purpose                          = (known after apply)
+      [32m+[0m[0m region                           = "us-central1"
+      [32m+[0m[0m self_link                        = (known after apply)
+      [32m+[0m[0m stack_type                       = (known after apply)
+      [32m+[0m[0m state                            = (known after apply)
+      [32m+[0m[0m subnetwork_id                    = (known after apply)
+
+      [32m+[0m[0m secondary_ip_range (known after apply)
+    }
+
+[1m  # module.vpc.google_service_networking_connection.private_vpc_connection[0m will be created
+[0m  [32m+[0m[0m resource "google_service_networking_connection" "private_vpc_connection" {
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m network                 = (known after apply)
+      [32m+[0m[0m peering                 = (known after apply)
+      [32m+[0m[0m reserved_peering_ranges = [
+          [32m+[0m[0m "private-ip-address",
+        ]
+      [32m+[0m[0m service                 = "servicenetworking.googleapis.com"
+    }
+
+[1mPlan:[0m [0m12 to add, 0 to change, 0 to destroy.
+[90m
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

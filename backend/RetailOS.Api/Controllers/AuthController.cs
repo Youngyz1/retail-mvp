@@ -9,7 +9,7 @@ using System.Text;
 
 namespace RetailOS.Api.Controllers;
 
-[Route("auth")]
+[Route("api/auth")]
 [ApiController]
 public class AuthController : ControllerBase
 {
@@ -28,6 +28,9 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
             return Unauthorized("Invalid credentials.");
+
+        if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow)
+            return Unauthorized("Account is locked.");
 
         var roles = await _userManager.GetRolesAsync(user);
         var role = roles.FirstOrDefault() ?? "User";

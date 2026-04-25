@@ -25,12 +25,10 @@ services:
       DATABASE_URL: postgresql://retail:retail123@db:5432/retail_db
       FRONTEND_ORIGIN: http://localhost:3000
     ports:
-      - "8000:8000"
+      - "8000:5000"
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
     restart: on-failure
 
   frontend:

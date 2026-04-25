@@ -8,7 +8,7 @@ namespace RetailOS.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class CustomersController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -28,12 +28,11 @@ public class CustomersController : ControllerBase
                 c.Name,
                 c.Email,
                 c.Phone,
-                c.CreatedAt,
-                TotalSpent = c.Orders.Where(o => o.Status != "Cancelled").SelectMany(o => o.Items).Sum(i => i.Subtotal)
+                c.CreatedAt
             })
             .OrderByDescending(c => c.Id)
             .ToListAsync();
-            
+
         return Ok(customers);
     }
 

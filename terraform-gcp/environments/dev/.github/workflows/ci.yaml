@@ -1,0 +1,52 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: retail-mvp-dev
+  GKE_CLUSTER: gke-cluster
+  GKE_REGION: us-central1
+  WIF_PROVIDER: projects/1058692805920/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+  WIF_SERVICE_ACCOUNT: gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to GCP via Workload Identity
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ env.WIF_PROVIDER }}
+        service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+    - name: Set up gcloud
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Get GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_REGION }}
+
+    - name: Verify cluster access
+      run: kubectl get nodes
+
+    - name: Deploy to GKE
+      run: |
+        kubectl apply -f frontend-deployment.yaml
+        kubectl apply -f backend-deployment.yaml
+        kubectl apply -f ingress.yaml
+        kubectl rollout status deployment/frontend -n retail-app
+        kubectl rollout status deployment/backend -n retail-app

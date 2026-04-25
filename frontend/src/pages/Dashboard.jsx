@@ -151,7 +151,7 @@ export default function Dashboard() {
                       <td className="td"><ChannelBadge channel={o.channel} /></td>
                       <td className="td"><OrderStatusBadge status={o.status} /></td>
                       <td className="td font-semibold">
-                        ${o.items?.reduce((s, i) => s + Number(i.subtotal), 0).toFixed(2)}
+                        ${((o.items || []).reduce((s, i) => s + Number(i.subtotal), 0)).toFixed(2)}
                       </td>
                       <td className="td text-slate-400">{new Date(o.created_at).toLocaleDateString()}</td>
                     </tr>

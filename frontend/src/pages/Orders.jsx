@@ -161,7 +161,7 @@ export default function Orders() {
 
   useEffect(()=>{load();},[load]);
 
-  const totalRevenue = orders.reduce((s,o) => s + o.items.reduce((si,i) => si + Number(i.subtotal),0), 0);
+  const totalRevenue = orders.reduce((s,o) => s + (o.items || []).reduce((si,i) => si + Number(i.subtotal),0), 0);
 
   return (
     <div>
@@ -196,7 +196,7 @@ export default function Orders() {
               </tr></thead>
               <tbody className="divide-y divide-slate-100">
                 {orders.map(o => {
-                  const total = o.items.reduce((s,i)=>s+Number(i.subtotal),0) - Number(o.discount||0);
+                  const total = (o.items || []).reduce((s,i)=>s+Number(i.subtotal),0) - Number(o.discount||0);
                   return (
                     <tr key={o.id} className="hover:bg-slate-50">
                       <td className="td font-mono text-xs">{o.order_ref}</td>

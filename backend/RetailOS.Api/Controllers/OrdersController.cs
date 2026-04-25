@@ -8,7 +8,7 @@ namespace RetailOS.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -32,11 +32,11 @@ public class OrdersController : ControllerBase
                 Customer = new { o.Customer!.Name },
                 o.Status,
                 o.Channel,
-                Total = o.Items.Sum(i => i.Subtotal),
+                Total = o.Items.Sum(i => i.Quantity * i.UnitPrice),
                 o.CreatedAt
             })
             .ToListAsync();
-            
+
         return Ok(orders);
     }
 

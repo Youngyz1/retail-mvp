@@ -3,11 +3,12 @@ import { BrowserRouter, Routes, Route, NavLink, Navigate, Outlet } from 'react-r
 import {
   HomeIcon, CubeIcon, ShoppingCartIcon, UsersIcon,
   TruckIcon, DocumentTextIcon, ChartBarIcon, BuildingStorefrontIcon,
-  Cog6ToothIcon, ArrowRightOnRectangleIcon
+  Cog6ToothIcon, ArrowRightOnRectangleIcon, SunIcon, MoonIcon
 } from '@heroicons/react/24/outline';
 import { analyticsApi } from './api';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useTheme } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import Dashboard     from './pages/Dashboard';
@@ -32,8 +33,26 @@ const NAV = [
   { to: '/analytics',      label: 'Analytics',        Icon: ChartBarIcon },
 ];
 
+function Clock() {
+  const [time, setTime] = React.useState(new Date());
+  
+  React.useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  return (
+    <div className="mt-4 flex items-center justify-center bg-slate-800/50 rounded-lg py-2 border border-slate-700/50 shadow-inner" title={time.toLocaleDateString()}>
+      <span className="text-white font-mono text-sm font-bold tracking-wider drop-shadow-md">
+        {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+      </span>
+    </div>
+  );
+}
+
 function Sidebar({ lowStock }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <aside className="w-64 min-h-screen bg-slate-900 flex flex-col fixed left-0 top-0 bottom-0 z-30 shadow-xl">
@@ -43,6 +62,7 @@ function Sidebar({ lowStock }) {
           <span className="text-white font-bold text-xl tracking-tight">RetailOS</span>
         </div>
         <p className="text-slate-400 text-xs mt-0.5">Business Management System</p>
+        <Clock />
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -89,9 +109,14 @@ function Sidebar({ lowStock }) {
               <span className="text-sm font-medium text-white">{user?.fullName || 'User'}</span>
               <span className="text-xs text-slate-400">{user?.email}</span>
            </div>
-           <button onClick={logout} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors" title="Logout">
-              <ArrowRightOnRectangleIcon className="w-5 h-5" />
-           </button>
+           <div className="flex items-center gap-1">
+             <button onClick={toggleTheme} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors" title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+                {theme === 'dark' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+             </button>
+             <button onClick={logout} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors" title="Logout">
+                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+             </button>
+           </div>
         </div>
       </div>
     </aside>
@@ -110,7 +135,7 @@ function DashboardLayout() {
   return (
     <div className="flex">
       <Sidebar lowStock={lowStock} />
-      <main className="ml-64 flex-1 min-h-screen p-8 bg-slate-50">
+      <main className="ml-64 flex-1 min-h-screen p-8 bg-slate-50 dark:bg-slate-950">
         <Outlet />
       </main>
     </div>

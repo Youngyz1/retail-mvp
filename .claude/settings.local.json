@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -name *test* -o -name *Test*)",
+      "Bash(find frontend/src -type f -name *.jsx -o -name *.js)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet clean:*)"
+    ]
+  }
+}
