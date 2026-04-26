@@ -46,10 +46,8 @@ jobs:
         location: ${{ env.GKE_REGION }}
     - name: Apply k8s manifests with correct images
       run: |
-        FRONTEND_IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}
-        BACKEND_IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}
-        sed "s|IMAGE_TAG_FRONTEND|$FRONTEND_IMAGE|g" k8s/frontend-deployment.yaml | kubectl apply -f -
-        sed "s|IMAGE_TAG_BACKEND|$BACKEND_IMAGE|g" k8s/backend-deployment.yaml | kubectl apply -f -
+        sed "s|IMAGE_TAG_FRONTEND|${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}|g" k8s/frontend-deployment.yaml | kubectl apply -f -
+        sed "s|IMAGE_TAG_BACKEND|${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}|g" k8s/backend-deployment.yaml | kubectl apply -f -
         kubectl apply -f k8s/ingress.yaml
     - name: Wait for rollout
       run: |
