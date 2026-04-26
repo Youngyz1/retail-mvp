@@ -40,3 +40,9 @@ resource "google_service_account_iam_member" "token_creator" {
   member             = "principalSet://iam.googleapis.com/projects/1058692805920/locations/global/workloadIdentityPools/github-pool/attribute.repository/Youngyz1/retail-mvp"
 }
 
+
+resource "google_service_account_iam_member" "ksa_binding" {
+  service_account_id = google_service_account.gke_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:retail-mvp-dev.svc.id.goog[retail-app/gke-app-ksa]"
+}
