@@ -16,7 +16,7 @@ spec:
       serviceAccountName: gke-app-ksa
       containers:
       - name: backend
-        image: IMAGE_TAG_BACKEND
+        image: us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:8ef76114d476a4ad6afaf03c8c1c2d896723e7ff
         ports:
         - containerPort: 8080
         env:
