@@ -15,8 +15,6 @@ spec:
         app: backend
     spec:
       serviceAccountName: gke-app-ksa
-      readinessGates:
-      - conditionType: "cloud.google.com/load-balancer-neg-ready"
       containers:
       - name: backend
         image: IMAGE_TAG_BACKEND
@@ -49,6 +47,7 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
+
 
 
 

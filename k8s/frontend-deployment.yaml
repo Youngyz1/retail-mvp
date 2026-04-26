@@ -15,13 +15,12 @@ spec:
         app: frontend
     spec:
       serviceAccountName: gke-app-ksa
-      readinessGates:
-      - conditionType: "cloud.google.com/load-balancer-neg-ready"
       containers:
       - name: frontend
         image: IMAGE_TAG_FRONTEND
         ports:
         - containerPort: 80
+
 
 
 
