@@ -16,6 +16,7 @@ spec:
       serviceAccountName: gke-app-ksa
       containers:
       - name: frontend
-        image: nginx
+        image: IMAGE_TAG_FRONTEND
         ports:
         - containerPort: 80
+
