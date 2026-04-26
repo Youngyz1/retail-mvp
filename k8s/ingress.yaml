@@ -22,8 +22,8 @@ spec:
   selector:
     app: backend
   ports:
-  - port: 8000
-    targetPort: 8080
+  - port: 5000
+    targetPort: 5000
   type: ClusterIP
 ---
 apiVersion: cloud.google.com/v1
@@ -61,4 +61,4 @@ spec:
           service:
             name: backend-service
             port:
-              number: 8000
+              number: 5000

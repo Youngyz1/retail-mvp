@@ -18,20 +18,14 @@ spec:
       - name: backend
         image: us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:8ef76114d476a4ad6afaf03c8c1c2d896723e7ff
         ports:
-        - containerPort: 8080
+        - containerPort: 5000
         env:
         - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: database-url
+          value: "postgresql://app_user:super-secure-password@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable"
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
         - name: Jwt__Key
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: jwt-key
+          value: "ThisIsAVerySecretKeyThatNeedsToBeLongEnoughForHMAC256"
         - name: Jwt__Issuer
           value: "RetailOS.Api"
         - name: Jwt__Audience
@@ -40,7 +34,6 @@ spec:
         image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
         args:
         - "--structured-logs"
-        - "--private-ip"
         - "--port=5432"
         - "retail-mvp-dev:us-central1:postgres-instance"
         securityContext:
