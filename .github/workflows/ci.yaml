@@ -1,7 +1,9 @@
 name: CI/CD Pipeline
+
 on:
   push:
     branches: [main]
+
 env:
   PROJECT_ID: retail-mvp-dev
   GKE_CLUSTER: gke-cluster
@@ -10,6 +12,7 @@ env:
   REPOSITORY: retail-repo
   WIF_PROVIDER: projects/1058692805920/locations/global/workloadIdentityPools/github-pool/providers/github-provider
   WIF_SERVICE_ACCOUNT: gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com
+
 jobs:
   deploy:
     name: Build and Deploy
@@ -17,44 +20,55 @@ jobs:
     permissions:
       contents: read
       id-token: write
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
     - name: Authenticate to GCP via Workload Identity
       uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: ${{ env.WIF_PROVIDER }}
         service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
     - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ env.PROJECT_ID }}
+
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
     - name: Build and push frontend image
       run: |
         docker build -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} ./frontend
         docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}
+
     - name: Build and push backend image
       run: |
         docker build -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }} ./backend
         docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}
+
     - name: Get GKE credentials
       uses: google-github-actions/get-gke-credentials@v2
       with:
         cluster_name: ${{ env.GKE_CLUSTER }}
         location: ${{ env.GKE_REGION }}
-    - name: Apply k8s manifests
-      run: kubectl apply -f k8s/
-    - name: Update images
+
+    - name: Update image tags in k8s manifests
       run: |
-        kubectl set image deployment/frontend \
-          frontend=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} \
-          -n retail-app
-        kubectl set image deployment/backend \
-          backend=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }} \
-          -n retail-app
-    - name: Wait for rollout
+        sed -i "s|IMAGE_TAG_FRONTEND|${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}|g" k8s/frontend-deployment.yaml
+        sed -i "s|IMAGE_TAG_BACKEND|${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}|g" k8s/backend-deployment.yaml
+
+    - name: Commit updated manifests
       run: |
-        kubectl rollout status deployment/frontend -n retail-app --timeout=600s
-        kubectl rollout status deployment/backend -n retail-app --timeout=600s
+        git config user.email "ci@retail-mvp.dev"
+        git config user.name "CI Bot"
+        git add k8s/
+        git diff --staged --quiet || git commit -m "ci: update image tags to ${{ github.sha }}"
+        git push
+
+    - name: Wait for ArgoCD sync
+      run: |
+        kubectl wait --for=condition=ready pod -l app=frontend -n retail-app --timeout=300s
+        kubectl wait --for=condition=ready pod -l app=backend -n retail-app --timeout=300s
