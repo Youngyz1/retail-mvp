@@ -16,7 +16,7 @@ spec:
       serviceAccountName: gke-app-ksa
       containers:
       - name: backend
-        image: us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:8ef76114d476a4ad6afaf03c8c1c2d896723e7ff
+        image: IMAGE_TAG_BACKEND
         ports:
         - containerPort: 5000
         env:
@@ -34,6 +34,7 @@ spec:
         image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
         args:
         - "--structured-logs"
+        - "--private-ip"
         - "--port=5432"
         - "retail-mvp-dev:us-central1:postgres-instance"
         securityContext:
