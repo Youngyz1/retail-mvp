@@ -18,12 +18,14 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Authenticate to GCP via Workload Identity
       uses: google-github-actions/auth@v2
@@ -68,7 +70,7 @@ jobs:
         git diff --staged --quiet || git commit -m "ci: update image tags to ${{ github.sha }}"
         git push
 
-    - name: Wait for ArgoCD sync
+    - name: Wait for pods ready
       run: |
         kubectl wait --for=condition=ready pod -l app=frontend -n retail-app --timeout=300s
         kubectl wait --for=condition=ready pod -l app=backend -n retail-app --timeout=300s
