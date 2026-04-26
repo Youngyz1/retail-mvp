@@ -4,6 +4,7 @@ metadata:
   name: backend
   namespace: retail-app
 spec:
+  progressDeadlineSeconds: 900
   replicas: 1
   selector:
     matchLabels:
@@ -14,9 +15,11 @@ spec:
         app: backend
     spec:
       serviceAccountName: gke-app-ksa
+      readinessGates:
+      - conditionType: "cloud.google.com/load-balancer-neg-ready"
       containers:
       - name: backend
-        image: us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:b6d165eef881b9c80eb18aeb7af40a30bdcc4571
+        image: IMAGE_TAG_BACKEND
         ports:
         - containerPort: 5000
         env:
@@ -46,3 +49,6 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
+
+
+
