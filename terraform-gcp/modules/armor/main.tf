@@ -4,6 +4,17 @@ resource "google_compute_security_policy" "retail_armor" {
 
   rule {
     action      = "allow"
+    priority    = 500
+    description = "Allow all API endpoints"
+    match {
+      expr {
+        expression = "request.path.matches('/api/.*')"
+      }
+    }
+  }
+
+  rule {
+    action      = "allow"
     priority    = 900
     description = "Allow auth endpoints"
     match {
