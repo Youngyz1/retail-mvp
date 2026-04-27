@@ -20,36 +20,62 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Install Helm
+      uses: azure/setup-helm@v4
+      with:
+        version: v3.14.0
+
+    - name: Lint Helm chart
+      run: |
+        helm lint helm/retailos \
+          -f helm/retailos/values.yaml \
+          -f helm/retailos/values-dev.yaml
+
     - name: Authenticate to GCP via Workload Identity
       uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: ${{ env.WIF_PROVIDER }}
         service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
     - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ env.PROJECT_ID }}
+
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
     - name: Build and push frontend image
       run: |
         docker build -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} ./frontend
         docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}
+
     - name: Build and push backend image
       run: |
         docker build -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }} ./backend
         docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}
+
     - name: Get GKE credentials
       uses: google-github-actions/get-gke-credentials@v2
       with:
         cluster_name: ${{ env.GKE_CLUSTER }}
         location: ${{ env.GKE_REGION }}
-    - name: Apply k8s manifests with correct images
+
+    - name: Bootstrap namespace and service account
       run: |
-        sed "s|IMAGE_TAG_FRONTEND|${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}|g" k8s/frontend-deployment.yaml | kubectl apply -f -
-        sed "s|IMAGE_TAG_BACKEND|${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}|g" k8s/backend-deployment.yaml | kubectl apply -f -
-        kubectl apply -f k8s/ingress.yaml
-    - name: Wait for rollout
+        kubectl create namespace retail-app --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create serviceaccount gke-app-ksa -n retail-app --dry-run=client -o yaml | kubectl apply -f -
+        kubectl annotate serviceaccount gke-app-ksa -n retail-app \
+          iam.gke.io/gcp-service-account=gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com --overwrite
+
+    - name: Deploy via Helm
       run: |
-        kubectl rollout status deployment/frontend -n retail-app --timeout=600s
-        kubectl rollout status deployment/backend -n retail-app --timeout=600s
+        helm upgrade --install retailos ./helm/retailos \
+          --namespace retail-app \
+          --create-namespace \
+          -f helm/retailos/values.yaml \
+          -f helm/retailos/values-dev.yaml \
+          --set backend.image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }} \
+          --set frontend.image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} \
+          --timeout 10m
