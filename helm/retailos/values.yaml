@@ -14,7 +14,7 @@ backend:
   # Image is injected at deploy time by CI via --set
   image: "us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:latest"
   replicas: 1
-  port: 5000
+  port: 8080
   progressDeadlineSeconds: 900
   env:
     # Full PostgreSQL connection URL — override in values-dev.yaml
@@ -55,3 +55,5 @@ ingress:
   staticIpName: "retail-static-ip"
   cloudArmorPolicy: "retail-cloud-armor"
   backendConfigName: "retail-backend-config"
+
+

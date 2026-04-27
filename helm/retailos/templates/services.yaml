@@ -32,6 +32,7 @@ spec:
   selector:
     app: backend
   ports:
-  - port: {{ .Values.backend.port }}
+  - port: 8000
     targetPort: {{ .Values.backend.port }}
   type: ClusterIP
+
