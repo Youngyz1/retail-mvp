@@ -1,0 +1,37 @@
+---
+# ── Frontend ClusterIP Service ────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: frontend
+    {{- include "retailos.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: {{ .Values.frontend.port }}
+    targetPort: {{ .Values.frontend.port }}
+  type: ClusterIP
+
+---
+# ── Backend ClusterIP Service ─────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: backend
+    {{- include "retailos.labels" . | nindent 4 }}
+  annotations:
+    cloud.google.com/backend-config: '{"default": "{{ .Values.ingress.backendConfigName }}"}'
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: {{ .Values.backend.port }}
+    targetPort: {{ .Values.backend.port }}
+  type: ClusterIP

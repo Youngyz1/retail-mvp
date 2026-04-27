@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: backend
+    {{- include "retailos.labels" . | nindent 4 }}
+spec:
+  progressDeadlineSeconds: {{ .Values.backend.progressDeadlineSeconds }}
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      containers:
+
+      # ── ASP.NET Core API ──────────────────────
+      - name: backend
+        image: {{ .Values.backend.image }}
+        ports:
+        - containerPort: {{ .Values.backend.port }}
+        env:
+        - name: DATABASE_URL
+          value: {{ .Values.backend.env.databaseUrl | quote }}
+        - name: ASPNETCORE_ENVIRONMENT
+          value: {{ .Values.backend.env.aspnetcoreEnvironment | quote }}
+        - name: Jwt__Key
+          value: {{ .Values.jwt.key | quote }}
+        - name: Jwt__Issuer
+          value: {{ .Values.jwt.issuer | quote }}
+        - name: Jwt__Audience
+          value: {{ .Values.jwt.audience | quote }}
+
+      # ── Cloud SQL Auth Proxy Sidecar ──────────
+      - name: cloud-sql-proxy
+        image: {{ .Values.cloudsql.proxyImage }}
+        args:
+        - "--structured-logs"
+        - "--private-ip"
+        - "--port={{ .Values.cloudsql.port }}"
+        - {{ .Values.cloudsql.instance | quote }}
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          requests:
+            memory: {{ .Values.cloudsql.resources.requests.memory | quote }}
+            cpu: {{ .Values.cloudsql.resources.requests.cpu | quote }}
+          limits:
+            memory: {{ .Values.cloudsql.resources.limits.memory | quote }}
+            cpu: {{ .Values.cloudsql.resources.limits.cpu | quote }}

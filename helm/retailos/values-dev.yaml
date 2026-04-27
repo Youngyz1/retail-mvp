@@ -1,0 +1,14 @@
+# ─────────────────────────────────────────────
+# RetailOS Helm Chart — Dev Environment Overrides
+# Loaded on top of values.yaml for the dev GCP project.
+# ─────────────────────────────────────────────
+
+backend:
+  env:
+    databaseUrl: "postgresql://app_user:super-secure-password@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable"
+
+jwt:
+  key: "ThisIsAVerySecretKeyThatNeedsToBeLongEnoughForHMAC256"
+
+cloudsql:
+  instance: "retail-mvp-dev:us-central1:postgres-instance"

@@ -1,0 +1,10 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ .Values.ingress.backendConfigName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "retailos.labels" . | nindent 4 }}
+spec:
+  securityPolicy:
+    name: {{ .Values.ingress.cloudArmorPolicy }}
