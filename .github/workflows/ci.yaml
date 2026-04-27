@@ -10,6 +10,7 @@ env:
   REPOSITORY: retail-repo
   WIF_PROVIDER: projects/1058692805920/locations/global/workloadIdentityPools/github-pool/providers/github-provider
   WIF_SERVICE_ACCOUNT: gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com
+
 jobs:
   deploy:
     name: Build and Deploy
@@ -46,15 +47,35 @@ jobs:
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
+    # ── Frontend ────────────────────────────────────────────────────────────
     - name: Build and push frontend image
       run: |
-        docker build -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} ./frontend
-        docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}
+        IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend
 
+        # Build once, tag with commit SHA
+        docker build -t ${IMAGE}:${{ github.sha }} ./frontend
+
+        # Also tag as latest so values.yaml fallback works
+        docker tag ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
+
+        # Push both tags
+        docker push ${IMAGE}:${{ github.sha }}
+        docker push ${IMAGE}:latest
+
+    # ── Backend ─────────────────────────────────────────────────────────────
     - name: Build and push backend image
       run: |
-        docker build -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }} ./backend
-        docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}
+        IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend
+
+        # Build once, tag with commit SHA
+        docker build -t ${IMAGE}:${{ github.sha }} ./backend
+
+        # Also tag as latest so values.yaml fallback works
+        docker tag ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
+
+        # Push both tags
+        docker push ${IMAGE}:${{ github.sha }}
+        docker push ${IMAGE}:latest
 
     - name: Get GKE credentials
       uses: google-github-actions/get-gke-credentials@v2
@@ -69,6 +90,7 @@ jobs:
         kubectl annotate serviceaccount gke-app-ksa -n retail-app \
           iam.gke.io/gcp-service-account=gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com --overwrite
 
+    # Deploy with commit SHA tag (not latest) for traceability
     - name: Deploy via Helm
       run: |
         helm upgrade --install retailos ./helm/retailos \
@@ -79,3 +101,10 @@ jobs:
           --set backend.image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }} \
           --set frontend.image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} \
           --timeout 10m
+
+    # ── Post-deploy health check ─────────────────────────────────────────────
+    - name: Verify rollout
+      run: |
+        kubectl rollout status deployment/backend -n retail-app --timeout=5m
+        kubectl rollout status deployment/frontend -n retail-app --timeout=5m
+        kubectl get pods -n retail-app
