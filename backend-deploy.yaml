@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: retailos:apps/Deployment:retail-app/backend
+    deployment.kubernetes.io/revision: "15"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"retailos:apps/Deployment:retail-app/backend"},"labels":{"app":"backend","app.kubernetes.io/instance":"retailos","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"retailos","helm.sh/chart":"retailos-0.1.0"},"name":"backend","namespace":"retail-app"},"spec":{"progressDeadlineSeconds":900,"replicas":1,"selector":{"matchLabels":{"app":"backend"}},"template":{"metadata":{"labels":{"app":"backend"}},"spec":{"containers":[{"env":[{"name":"DATABASE_URL","value":""},{"name":"ASPNETCORE_ENVIRONMENT","value":"Production"},{"name":"Jwt__Key","value":""},{"name":"Jwt__Issuer","value":"RetailOS.Api"},{"name":"Jwt__Audience","value":"RetailOS.Client"}],"image":"us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:latest","name":"backend","ports":[{"containerPort":8080}]},{"args":["--structured-logs","--private-ip","--port=5432",""],"image":"gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0","name":"cloud-sql-proxy","resources":{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}},"securityContext":{"runAsNonRoot":true}}],"serviceAccountName":"gke-app-ksa"}}}}
+    meta.helm.sh/release-name: retailos
+    meta.helm.sh/release-namespace: retail-app
+  creationTimestamp: "2026-04-27T11:09:09Z"
+  generation: 15
+  labels:
+    app: backend
+    app.kubernetes.io/instance: retailos
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: retailos
+    helm.sh/chart: retailos-0.1.0
+  name: backend
+  namespace: retail-app
+  resourceVersion: "1777310235724399020"
+  uid: f14f5c6b-0ccb-4dc1-a221-976c0ea7ccf4
+spec:
+  progressDeadlineSeconds: 900
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: backend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2026-04-27T18:17:06+01:00"
+      labels:
+        app: backend
+    spec:
+      containers:
+      - env:
+        - name: DATABASE_URL
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: Jwt__Key
+        - name: Jwt__Issuer
+          value: RetailOS.Api
+        - name: Jwt__Audience
+          value: RetailOS.Client
+        image: us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:latest
+        imagePullPolicy: Always
+        name: backend
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      - args:
+        - --structured-logs
+        - --private-ip
+        - --port=5432
+        - ""
+        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
+        imagePullPolicy: IfNotPresent
+        name: cloud-sql-proxy
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        securityContext:
+          runAsNonRoot: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: gke-app-ksa
+      serviceAccountName: gke-app-ksa
+      terminationGracePeriodSeconds: 30
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2026-04-27T11:30:42Z"
+    lastUpdateTime: "2026-04-27T11:30:42Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2026-04-27T15:01:58Z"
+    lastUpdateTime: "2026-04-27T17:17:15Z"
+    message: ReplicaSet "backend-88f8d7578" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 15
+  readyReplicas: 1
+  replicas: 1
+  terminatingReplicas: 0
+  updatedReplicas: 1
