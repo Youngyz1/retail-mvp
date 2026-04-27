@@ -15,6 +15,7 @@ backend:
   image: "us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:latest"
   replicas: 1
   port: 8080
+  servicePort: 8000
   progressDeadlineSeconds: 900
   env:
     # Full PostgreSQL connection URL — override in values-dev.yaml
@@ -55,5 +56,6 @@ ingress:
   staticIpName: "retail-static-ip"
   cloudArmorPolicy: "retail-cloud-armor"
   backendConfigName: "retail-backend-config"
+
 
 
