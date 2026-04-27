@@ -5,7 +5,7 @@ on:
 env:
   PROJECT_ID: retail-mvp-dev
   GKE_CLUSTER: gke-cluster
-  GKE_REGION: us-central1
+  GKE_REGION: us-central1-a
   REGISTRY: us-central1-docker.pkg.dev
   REPOSITORY: retail-repo
   WIF_PROVIDER: projects/1058692805920/locations/global/workloadIdentityPools/github-pool/providers/github-provider

@@ -1,6 +1,6 @@
 resource "google_container_cluster" "gke" {
   name                = "gke-cluster"
-  location            = var.region
+  location            = "${var.region}-a"  # Zonal (saves ~$74/month vs regional)
   deletion_protection = false
 
   remove_default_node_pool = true
@@ -39,21 +39,22 @@ resource "google_container_cluster" "gke" {
 resource "google_container_node_pool" "primary_nodes" {
   name     = "primary-node-pool"
   cluster  = google_container_cluster.gke.id
-  location = var.region
+  location = "${var.region}-a"  # Must match cluster zone
 
   node_config {
     machine_type    = "e2-medium"
-    disk_size_gb    = 50
+    spot            = true       # ~70% cheaper than on-demand
+    disk_size_gb    = 30         # Reduced from 50
     disk_type       = "pd-standard"
     service_account = var.gke_sa_email
     oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 
-  initial_node_count = 2
+  initial_node_count = 1  # Start with 1 (was 2)
 
   autoscaling {
     min_node_count = 1
-    max_node_count = 5
+    max_node_count = 3  # Reduced from 5
   }
 
   management {

@@ -25,6 +25,13 @@ spec:
         image: {{ .Values.backend.image }}
         ports:
         - containerPort: {{ .Values.backend.port }}
+        resources:
+          requests:
+            cpu: {{ .Values.backend.resources.requests.cpu | quote }}
+            memory: {{ .Values.backend.resources.requests.memory | quote }}
+          limits:
+            cpu: {{ .Values.backend.resources.limits.cpu | quote }}
+            memory: {{ .Values.backend.resources.limits.memory | quote }}
         env:
         - name: DATABASE_URL
           value: {{ .Values.backend.env.databaseUrl | quote }}
