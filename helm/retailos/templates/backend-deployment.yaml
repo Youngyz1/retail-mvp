@@ -31,7 +31,10 @@ spec:
         - name: ASPNETCORE_ENVIRONMENT
           value: {{ .Values.backend.env.aspnetcoreEnvironment | quote }}
         - name: Jwt__Key
-          value: {{ .Values.jwt.key | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: retailos-secrets
+              key: jwt-key
         - name: Jwt__Issuer
           value: {{ .Values.jwt.issuer | quote }}
         - name: Jwt__Audience
