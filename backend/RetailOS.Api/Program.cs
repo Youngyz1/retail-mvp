@@ -101,9 +101,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health");  // ADD THIS LINE
-app.MapGet("/", () => "RetailOS API is running.");
-
+app.MapHealthChecks("/health");
 app.MapGet("/", () => "RetailOS API is running.");
 
 app.Run();
