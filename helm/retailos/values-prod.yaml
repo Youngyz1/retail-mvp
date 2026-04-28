@@ -1,0 +1,20 @@
+# ─────────────────────────────────────────────
+# RetailOS Helm Chart — Prod Environment Overrides
+# ─────────────────────────────────────────────
+
+backend:
+  image: "us-central1-docker.pkg.dev/retail-mvp-prod/retail-repo/backend:latest"
+  env:
+    aspnetcoreEnvironment: "Production"
+    # db password is injected via CI or kubectl secret — do not hardcode here
+    databaseUrl: "postgresql://app_user:RetailApp2024Prod@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable"
+
+frontend:
+  image: "us-central1-docker.pkg.dev/retail-mvp-prod/retail-repo/frontend:latest"
+
+jwt:
+  # Use a different key from dev — rotate this via CI secret
+  key: "ThisIsAVerySecretKeyThatNeedsToBeLongEnoughForHMAC256"
+
+cloudsql:
+  instance: "retail-mvp-prod:us-central1:postgres-instance"

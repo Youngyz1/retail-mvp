@@ -20,3 +20,4 @@ frontend/node_modules/
 *.db-wal
 
 .terraform/
+terraform-gcp/environments/prod/terraform.tfvars

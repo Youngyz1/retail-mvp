@@ -22,11 +22,17 @@ spec:
         - containerPort: 5000
         env:
         - name: DATABASE_URL
-          value: "postgresql://app_user:super-secure-password@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable"
+          valueFrom:
+            secretKeyRef:
+              name: retailos-secrets
+              key: db-url
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
         - name: Jwt__Key
-          value: "ThisIsAVerySecretKeyThatNeedsToBeLongEnoughForHMAC256"
+          valueFrom:
+            secretKeyRef:
+              name: retailos-secrets
+              key: jwt-key
         - name: Jwt__Issuer
           value: "RetailOS.Api"
         - name: Jwt__Audience
@@ -37,7 +43,7 @@ spec:
         - "--structured-logs"
         - "--private-ip"
         - "--port=5432"
-        - "retail-mvp-dev:us-central1:postgres-instance"
+        - "CLOUDSQL_INSTANCE"  # replaced at deploy time
         securityContext:
           runAsNonRoot: true
         resources:

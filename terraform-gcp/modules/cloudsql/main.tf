@@ -5,21 +5,21 @@ resource "google_sql_database_instance" "postgres" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"  # Cheapest tier (~$8/month vs $52)
+    tier = var.tier
 
     ip_configuration {
       ipv4_enabled    = false
       private_network = var.network
     }
 
-    availability_type = "ZONAL"  # No HA replica (saves ~$25/month)
+    availability_type = var.availability_type
 
     backup_configuration {
-      enabled                        = false  # No backups for dev
-      point_in_time_recovery_enabled = false
+      enabled                        = var.backups_enabled
+      point_in_time_recovery_enabled = var.backups_enabled
     }
 
-    disk_autoresize_limit = 20  # Reduced from 100
+    disk_autoresize_limit = var.disk_limit
 
     maintenance_window {
       day          = 7

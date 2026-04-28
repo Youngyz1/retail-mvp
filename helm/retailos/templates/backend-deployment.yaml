@@ -34,7 +34,10 @@ spec:
             memory: {{ .Values.backend.resources.limits.memory | quote }}
         env:
         - name: DATABASE_URL
-          value: {{ .Values.backend.env.databaseUrl | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: retailos-secrets
+              key: db-url
         - name: ASPNETCORE_ENVIRONMENT
           value: {{ .Values.backend.env.aspnetcoreEnvironment | quote }}
         - name: Jwt__Key

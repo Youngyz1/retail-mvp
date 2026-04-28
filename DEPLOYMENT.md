@@ -498,3 +498,31 @@ kubectl delete pod <pod-name> -n retail-app --grace-period=0 --force
 - [ ] Ingress has external IP (`kubectl get ingress -n retail-app`)
 - [ ] Application accessible via external IP
 - [ ] GitHub Actions CI/CD tested (push to main)
+
+
+
+# RetailOS Deployment Runbook
+
+## Prod Deploy (Helm)
+```bash
+helm upgrade --install retailos ./helm/retailos \
+  -f ./helm/retailos/values.yaml \
+  -f ./helm/retailos/values-prod.yaml \
+  --namespace retail-app
+```
+
+## Secrets (must exist before deploy)
+These are NOT in values files — set them manually or via CI:
+- `db-url` → Cloud SQL connection string with password
+- `jwt-key` → JWT signing key (different from dev)
+
+## Cloud SQL User
+- Instance: `retail-mvp-prod:us-central1:postgres-instance`
+- User: `app_user`
+- Password: stored in GCP Secret Manager (not in code)
+
+## Check prod status
+```bash
+kubectl get pods -n retail-app
+kubectl logs -n retail-app -l app=backend -c backend --tail=20
+```
