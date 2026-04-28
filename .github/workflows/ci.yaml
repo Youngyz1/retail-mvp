@@ -2,6 +2,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main]
+
 env:
   PROJECT_ID: retail-mvp-dev
   GKE_CLUSTER: gke-cluster
@@ -12,12 +13,16 @@ env:
   WIF_SERVICE_ACCOUNT: gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com
 
 jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Build, push, and deploy to DEV
+  # ────────────────────────────────────────────────────────────────────────────
   deploy:
-    name: Build and Deploy
+    name: Build and Deploy (dev)
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -47,33 +52,21 @@ jobs:
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-    # ── Frontend ────────────────────────────────────────────────────────────
+    # ── Frontend ──────────────────────────────────────────────────────────────
     - name: Build and push frontend image
       run: |
         IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend
-
-        # Build once, tag with commit SHA
         docker build -t ${IMAGE}:${{ github.sha }} ./frontend
-
-        # Also tag as latest so values.yaml fallback works
-        docker tag ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
-
-        # Push both tags
+        docker tag  ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
         docker push ${IMAGE}:${{ github.sha }}
         docker push ${IMAGE}:latest
 
-    # ── Backend ─────────────────────────────────────────────────────────────
+    # ── Backend ───────────────────────────────────────────────────────────────
     - name: Build and push backend image
       run: |
         IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend
-
-        # Build once, tag with commit SHA
         docker build -t ${IMAGE}:${{ github.sha }} ./backend
-
-        # Also tag as latest so values.yaml fallback works
-        docker tag ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
-
-        # Push both tags
+        docker tag  ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
         docker push ${IMAGE}:${{ github.sha }}
         docker push ${IMAGE}:latest
 
@@ -90,8 +83,16 @@ jobs:
         kubectl annotate serviceaccount gke-app-ksa -n retail-app \
           iam.gke.io/gcp-service-account=gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com --overwrite
 
-    # Deploy with commit SHA tag (not latest) for traceability
-    - name: Deploy via Helm
+        # Adopt retailos-secrets into Helm ownership if it was created manually
+        if kubectl get secret retailos-secrets -n retail-app &>/dev/null; then
+          kubectl label secret retailos-secrets -n retail-app \
+            "app.kubernetes.io/managed-by=Helm" --overwrite
+          kubectl annotate secret retailos-secrets -n retail-app \
+            "meta.helm.sh/release-name=retailos" \
+            "meta.helm.sh/release-namespace=retail-app" --overwrite
+        fi
+
+    - name: Deploy via Helm (dev)
       run: |
         helm upgrade --install retailos ./helm/retailos \
           --namespace retail-app \
@@ -102,9 +103,109 @@ jobs:
           --set frontend.image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} \
           --timeout 10m
 
-    # ── Post-deploy health check ─────────────────────────────────────────────
-    - name: Verify rollout
+    - name: Verify dev rollout
       run: |
-        kubectl rollout status deployment/backend -n retail-app --timeout=5m
+        kubectl rollout status deployment/backend  -n retail-app --timeout=5m
         kubectl rollout status deployment/frontend -n retail-app --timeout=5m
         kubectl get pods -n retail-app
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Promote images and deploy to PROD (only after dev succeeds)
+  # ────────────────────────────────────────────────────────────────────────────
+  deploy-prod:
+    name: Promote and Deploy (prod)
+    runs-on: ubuntu-latest
+    needs: deploy                          # blocks until dev job passes
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      PROD_PROJECT_ID: retail-mvp-prod
+      PROD_WIF_SERVICE_ACCOUNT: gke-app-sa@retail-mvp-prod.iam.gserviceaccount.com
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Helm
+      uses: azure/setup-helm@v4
+      with:
+        version: v3.14.0
+
+    - name: Authenticate to GCP (prod)
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ env.WIF_PROVIDER }}
+        service_account: ${{ env.PROD_WIF_SERVICE_ACCOUNT }}
+
+    - name: Set up gcloud (prod)
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROD_PROJECT_ID }}
+
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+    - name: Promote images dev → prod registry
+      run: |
+        DEV=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}
+        PROD=${{ env.REGISTRY }}/${{ env.PROD_PROJECT_ID }}/${{ env.REPOSITORY }}
+        SHA=${{ github.sha }}
+
+        # Pull the SHA-tagged images built in the dev job
+        docker pull ${DEV}/backend:${SHA}
+        docker pull ${DEV}/frontend:${SHA}
+
+        # Retag and push to prod registry (SHA + latest)
+        docker tag ${DEV}/backend:${SHA}  ${PROD}/backend:${SHA}
+        docker tag ${DEV}/backend:${SHA}  ${PROD}/backend:latest
+        docker tag ${DEV}/frontend:${SHA} ${PROD}/frontend:${SHA}
+        docker tag ${DEV}/frontend:${SHA} ${PROD}/frontend:latest
+
+        docker push ${PROD}/backend:${SHA}
+        docker push ${PROD}/backend:latest
+        docker push ${PROD}/frontend:${SHA}
+        docker push ${PROD}/frontend:latest
+
+    - name: Get GKE credentials (prod)
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_REGION }}
+        project_id: ${{ env.PROD_PROJECT_ID }}
+
+    - name: Bootstrap prod namespace and service account
+      run: |
+        kubectl create namespace retail-app --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create serviceaccount gke-app-ksa -n retail-app --dry-run=client -o yaml | kubectl apply -f -
+        kubectl annotate serviceaccount gke-app-ksa -n retail-app \
+          iam.gke.io/gcp-service-account=gke-app-sa@retail-mvp-prod.iam.gserviceaccount.com --overwrite
+
+        # Adopt retailos-secrets into Helm ownership if it was created manually
+        if kubectl get secret retailos-secrets -n retail-app &>/dev/null; then
+          kubectl label secret retailos-secrets -n retail-app \
+            "app.kubernetes.io/managed-by=Helm" --overwrite
+          kubectl annotate secret retailos-secrets -n retail-app \
+            "meta.helm.sh/release-name=retailos" \
+            "meta.helm.sh/release-namespace=retail-app" --overwrite
+        fi
+
+    - name: Deploy via Helm (prod)
+      run: |
+        helm upgrade --install retailos ./helm/retailos \
+          --namespace retail-app \
+          --create-namespace \
+          -f helm/retailos/values.yaml \
+          -f helm/retailos/values-prod.yaml \
+          --set backend.image=${{ env.REGISTRY }}/${{ env.PROD_PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }} \
+          --set frontend.image=${{ env.REGISTRY }}/${{ env.PROD_PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} \
+          --atomic \
+          --timeout 10m
+
+    - name: Verify prod rollout
+      run: |
+        kubectl rollout status deployment/backend  -n retail-app --timeout=5m
+        kubectl rollout status deployment/frontend -n retail-app --timeout=5m
+        kubectl get pods -n retail-app
+        

@@ -21,3 +21,4 @@ frontend/node_modules/
 
 .terraform/
 terraform-gcp/environments/prod/terraform.tfvars
+argocd.exe
