@@ -239,6 +239,7 @@ helm upgrade --install retailos ./helm/retailos \
 ### 5.3 Verify deployment
 
 ```bash
+
 kubectl get pods -n retail-app
 kubectl get svc -n retail-app
 kubectl get ingress -n retail-app

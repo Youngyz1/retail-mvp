@@ -1,0 +1,185 @@
+Name:             backend-57ffdbcb94-vl4w8
+Namespace:        retail-app
+Priority:         0
+Service Account:  gke-app-ksa
+Node:             gke-gke-cluster-primary-node-pool-d0bc5a56-qs6g/10.0.0.38
+Start Time:       Mon, 27 Apr 2026 21:15:52 +0100
+Labels:           app=backend
+                  pod-template-hash=57ffdbcb94
+                  topology.kubernetes.io/region=us-central1
+                  topology.kubernetes.io/zone=us-central1-a
+Annotations:      <none>
+Status:           Running
+IP:               10.1.1.2
+IPs:
+  IP:           10.1.1.2
+Controlled By:  ReplicaSet/backend-57ffdbcb94
+Containers:
+  backend:
+    Container ID:   containerd://698455e7034ab017b10cfad8e8837e60cc6302d72f54824abf937fd66b20b396
+    Image:          us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:1796f575f8bc6771953023f5bc75478c87c7ac3a
+    Image ID:       us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend@sha256:dfb02a8a6e8a1d5b3e913dcf0a116cb0866f4f2d1f47996e842ef8a6597227e2
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Mon, 27 Apr 2026 21:16:31 +0100
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    139
+      Started:      Mon, 27 Apr 2026 21:16:13 +0100
+      Finished:     Mon, 27 Apr 2026 21:16:17 +0100
+    Ready:          True
+    Restart Count:  1
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:     100m
+      memory:  256Mi
+    Environment:
+      DATABASE_URL:            postgresql://app_user:super-secure-password@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable
+      ASPNETCORE_ENVIRONMENT:  Production
+      Jwt__Key:                <set to the key 'jwt-key' in secret 'retailos-secrets'>  Optional: false
+      Jwt__Issuer:             RetailOS.Api
+      Jwt__Audience:           RetailOS.Client
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-cn7pd (ro)
+  cloud-sql-proxy:
+    Container ID:  containerd://8202af67ab19ebb5d5df4a01b19efb83c6ae600c4023683a644ec4c4e02b30d7
+    Image:         gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
+    Image ID:      gcr.io/cloud-sql-connectors/cloud-sql-proxy@sha256:19627ba27f0d6539f4fc62296c79bb122600f27c395e7698cf164739312c5e11
+    Port:          <none>
+    Host Port:     <none>
+    Args:
+      --structured-logs
+      --private-ip
+      --port=5432
+      retail-mvp-dev:us-central1:postgres-instance
+    State:          Running
+      Started:      Mon, 27 Apr 2026 21:16:24 +0100
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     100m
+      memory:  128Mi
+    Requests:
+      cpu:        50m
+      memory:     64Mi
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-cn7pd (ro)
+Readiness Gates:
+  Type                                       Status
+  cloud.google.com/load-balancer-neg-ready   True 
+Conditions:
+  Type                                       Status
+  cloud.google.com/load-balancer-neg-ready   True 
+  PodReadyToStartContainers                  True 
+  Initialized                                True 
+  Ready                                      True 
+  ContainersReady                            True 
+  PodScheduled                               True 
+Volumes:
+  kube-api-access-cn7pd:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason                             Age                    From                     Message
+  ----     ------                             ----                   ----                     -------
+  Warning  FailedScheduling                   6m8s                   default-scheduler        0/1 nodes are available: 1 Insufficient cpu. no new claims to deallocate, preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod.
+  Normal   LoadBalancerNegNotReady            6m7s (x2 over 6m8s)    neg-readiness-reflector  Waiting for pod to become healthy in at least one of the NEG(s): [k8s1-3709f69e-retail-app-backend-service-8000-ef68a726]
+  Normal   TriggeredScaleUp                   6m6s                   cluster-autoscaler       Pod triggered scale-up: [{https://www.googleapis.com/compute/v1/projects/retail-mvp-dev/zones/us-central1-a/instanceGroups/gke-gke-cluster-primary-node-pool-d0bc5a56-grp 1->2 (max: 3)}]
+  Warning  FailedScheduling                   3m29s (x3 over 3m32s)  default-scheduler        0/2 nodes are available: 1 Insufficient cpu, 1 node(s) had untolerated taint(s). no new claims to deallocate, preemption: 0/2 nodes are available: 1 No preemption victims found for incoming pod, 1 Preemption is not helpful for scheduling.
+  Normal   Scheduled                          3m26s                  default-scheduler        Successfully assigned retail-app/backend-57ffdbcb94-vl4w8 to gke-gke-cluster-primary-node-pool-d0bc5a56-qs6g
+  Normal   Pulled                             3m4s                   kubelet                  Successfully pulled image "us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:1796f575f8bc6771953023f5bc75478c87c7ac3a" in 9.832s (17.927s including waiting). Image size: 117068684 bytes.
+  Normal   Pulling                            3m4s                   kubelet                  Pulling image "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0"
+  Normal   Pulled                             2m54s                  kubelet                  Successfully pulled image "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0" in 2.683s (10.159s including waiting). Image size: 15761566 bytes.
+  Normal   Created                            2m54s                  kubelet                  Container created
+  Normal   Started                            2m53s                  kubelet                  Container started
+  Normal   Pulling                            2m52s (x2 over 3m22s)  kubelet                  Pulling image "us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:1796f575f8bc6771953023f5bc75478c87c7ac3a"
+  Normal   LoadBalancerNegWithoutHealthCheck  2m51s                  neg-readiness-reflector  Pod is in NEG "Key{\"k8s1-3709f69e-retail-app-backend-service-8000-ef68a726\", zone: \"us-central1-a\"}". NEG is not attached to any BackendService with health checking. Marking condition "cloud.google.com/load-balancer-neg-ready" to True.
+  Normal   Pulled                             2m47s                  kubelet                  Successfully pulled image "us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:1796f575f8bc6771953023f5bc75478c87c7ac3a" in 292ms (5.526s including waiting). Image size: 117068684 bytes.
+  Normal   Created                            2m46s (x2 over 3m4s)   kubelet                  Container created
+  Normal   Started                            2m46s (x2 over 3m4s)   kubelet                  Container started
+
+
+Name:             backend-5f4dc7f778-vqt7x
+Namespace:        retail-app
+Priority:         0
+Service Account:  gke-app-ksa
+Node:             <none>
+Labels:           app=backend
+                  pod-template-hash=5f4dc7f778
+Annotations:      <none>
+Status:           Pending
+IP:               
+IPs:              <none>
+Controlled By:    ReplicaSet/backend-5f4dc7f778
+Containers:
+  backend:
+    Image:      us-central1-docker.pkg.dev/retail-mvp-dev/retail-repo/backend:latest
+    Port:       8080/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:     100m
+      memory:  256Mi
+    Environment:
+      DATABASE_URL:            postgresql://app_user:super-secure-password@127.0.0.1:5432/app_db?sslmode=disable&gssencmode=disable
+      ASPNETCORE_ENVIRONMENT:  Production
+      Jwt__Key:                <set to the key 'jwt-key' in secret 'retailos-secrets'>  Optional: false
+      Jwt__Issuer:             RetailOS.Api
+      Jwt__Audience:           RetailOS.Client
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-lpg6h (ro)
+  cloud-sql-proxy:
+    Image:      gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
+    Port:       <none>
+    Host Port:  <none>
+    Args:
+      --structured-logs
+      --private-ip
+      --port=5432
+      retail-mvp-dev:us-central1:postgres-instance
+    Limits:
+      cpu:     100m
+      memory:  128Mi
+    Requests:
+      cpu:        50m
+      memory:     64Mi
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-lpg6h (ro)
+Readiness Gates:
+  Type                                       Status
+  cloud.google.com/load-balancer-neg-ready    
+Conditions:
+  Type                                       Status
+  PodScheduled                               False 
+  cloud.google.com/load-balancer-neg-ready    
+Volumes:
+  kube-api-access-lpg6h:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason                   Age                    From                     Message
+  ----     ------                   ----                   ----                     -------
+  Normal   LoadBalancerNegNotReady  2m36s (x2 over 2m36s)  neg-readiness-reflector  Waiting for pod to become healthy in at least one of the NEG(s): [k8s1-3709f69e-retail-app-backend-service-8000-ef68a726]
+  Normal   TriggeredScaleUp         2m35s                  cluster-autoscaler       Pod triggered scale-up: [{https://www.googleapis.com/compute/v1/projects/retail-mvp-dev/zones/us-central1-a/instanceGroups/gke-gke-cluster-primary-node-pool-d0bc5a56-grp 2->3 (max: 3)}]
+  Warning  FailedScheduling         48s (x2 over 2m36s)    default-scheduler        0/2 nodes are available: 2 Insufficient cpu. no new claims to deallocate, preemption: 0/2 nodes are available: 2 No preemption victims found for incoming pod.
