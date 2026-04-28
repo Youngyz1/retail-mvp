@@ -43,3 +43,11 @@ module "iam" {
 module "armor" {
   source = "../../modules/armor"
 }
+
+module "secretmanager" {
+  source       = "../../modules/secretmanager"
+  project_id   = var.project_id
+  gke_sa_email = module.iam.gke_sa_email
+  db_url       = var.db_url
+  jwt_key      = var.jwt_key
+}

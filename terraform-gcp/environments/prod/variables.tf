@@ -1,15 +1,22 @@
 variable "project_id" {
-  description = "GCP Project ID"
-  type        = string
+  type = string
 }
 
 variable "region" {
-  description = "Deployment region"
-  type        = string
+  type = string
 }
 
 variable "db_password" {
-  description = "PostgreSQL database password"
-  type        = string
-  sensitive   = true
+  type      = string
+  sensitive = true
+}
+
+variable "db_url" {
+  type      = string
+  sensitive = true
+}
+
+variable "jwt_key" {
+  type      = string
+  sensitive = true
 }
