@@ -62,8 +62,22 @@ spec:
           runAsNonRoot: true
         resources:
           requests:
-            memory: {{ .Values.cloudsql.resources.requests.memory | quote }}
-            cpu: {{ .Values.cloudsql.resources.requests.cpu | quote }}
+            cpu: {{ .Values.backend.resources.requests.cpu | quote }}
+            memory: {{ .Values.backend.resources.requests.memory | quote }}
           limits:
-            memory: {{ .Values.cloudsql.resources.limits.memory | quote }}
-            cpu: {{ .Values.cloudsql.resources.limits.cpu | quote }}
+            cpu: {{ .Values.backend.resources.limits.cpu | quote }}
+            memory: {{ .Values.backend.resources.limits.memory | quote }}
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.backend.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.backend.port }}
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          failureThreshold: 3

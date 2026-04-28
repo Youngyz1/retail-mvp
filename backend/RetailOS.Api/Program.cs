@@ -80,6 +80,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddOpenApi();
+builder.Services.AddHealthChecks();  // ADD THIS LINE
 
 var app = builder.Build();
 
@@ -100,6 +101,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");  // ADD THIS LINE
+app.MapGet("/", () => "RetailOS API is running.");
 
 app.MapGet("/", () => "RetailOS API is running.");
 
