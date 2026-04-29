@@ -1,4 +1,9 @@
 terraform {
+  backend "gcs" {
+    bucket = "retail-mvp-prod-tfstate"
+    prefix = "terraform/prod"
+  }
+
   required_providers {
     google = {
       source  = "hashicorp/google"
