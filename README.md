@@ -791,3 +791,63 @@ Supplier  ──1:N──▶  PurchaseOrder
 ## 📄 License
 
 Private project — not licensed for distribution.
+
+
+
+
+
+Cluster & Nodes:
+bash
+kubectl get nodes
+kubectl top nodes
+
+Pods: bash
+
+kubectl get pods -n retail-app
+kubectl get pods -n retail-app -o wide
+kubectl top pods -n retail-app
+
+Logs:bash
+kubectl logs -l app=backend -n retail-app -c backend --tail=20
+kubectl logs -l app=frontend -n retail-app --tail=20
+kubectl logs -l app=backend -n retail-app -c cloud-sql-proxy --tail=10
+
+Ingress & Networking:bash
+kubectl get ingress -n retail-app
+kubectl describe ingress retail-ingress -n retail-app
+
+Autoscaling:bash
+kubectl get hpa -n retail-app
+
+Secrets:bash
+kubectl get secret retailos-secrets -n retail-app -o jsonpath="{.data}"
+
+Database:bash
+gcloud sql instances describe postgres-instance \
+  --project=retail-mvp-prod \
+  --format="value(state,settings.dataDiskSizeGb)"
+
+Monitoring:bash
+kubectl get pods -n monitoring
+kubectl get pods -n argocd
+
+Test API:
+bash# Health
+curl -s http://34.149.225.237/health
+
+# Login as admin
+curl -s -X POST http://34.149.225.237/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@retailos.com","password":"Admin@123456"}'
+
+ArgoCD:bash
+export PATH=$PATH:~/bin
+argocd app get retail-mvp
+
+Cost check:bash
+kubectl top nodes
+kubectl top pods -n retail-app
+
+gcloud sql instances describe postgres-instance \
+  --project=retail-mvp-prod \
+  --format="value(state)"
