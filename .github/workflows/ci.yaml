@@ -12,6 +12,9 @@ env:
   WIF_PROVIDER: projects/1058692805920/locations/global/workloadIdentityPools/github-pool/providers/github-provider
 
 jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Build and deploy to DEV (dev branch only)
+  # ────────────────────────────────────────────────────────────────────────────
   deploy-dev:
     name: Build and Deploy (dev)
     runs-on: ubuntu-latest
@@ -22,29 +25,36 @@ jobs:
     env:
       PROJECT_ID: retail-mvp-dev
       WIF_SERVICE_ACCOUNT: gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
     - name: Install Helm
       uses: azure/setup-helm@v4
       with:
         version: v3.14.0
+
     - name: Lint Helm chart
       run: |
         helm lint helm/retailos \
           -f helm/retailos/values.yaml \
           -f helm/retailos/values-dev.yaml
+
     - name: Authenticate to GCP (dev)
       uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: ${{ env.WIF_PROVIDER }}
         service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
     - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ env.PROJECT_ID }}
+
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
     - name: Build and push frontend image
       run: |
         IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend
@@ -52,6 +62,7 @@ jobs:
         docker tag  ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
         docker push ${IMAGE}:${{ github.sha }}
         docker push ${IMAGE}:latest
+
     - name: Build and push backend image
       run: |
         IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend
@@ -59,18 +70,21 @@ jobs:
         docker tag  ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
         docker push ${IMAGE}:${{ github.sha }}
         docker push ${IMAGE}:latest
+
     - name: Get GKE credentials (dev)
       uses: google-github-actions/get-gke-credentials@v2
       with:
         cluster_name: ${{ env.GKE_CLUSTER }}
         location: ${{ env.GKE_REGION }}
         project_id: ${{ env.PROJECT_ID }}
+
     - name: Bootstrap namespace and service account
       run: |
         kubectl create namespace retail-app --dry-run=client -o yaml | kubectl apply -f -
         kubectl create serviceaccount gke-app-ksa -n retail-app --dry-run=client -o yaml | kubectl apply -f -
         kubectl annotate serviceaccount gke-app-ksa -n retail-app \
           iam.gke.io/gcp-service-account=gke-app-sa@retail-mvp-dev.iam.gserviceaccount.com --overwrite
+
         if kubectl get secret retailos-secrets -n retail-app &>/dev/null; then
           kubectl label secret retailos-secrets -n retail-app \
             "app.kubernetes.io/managed-by=Helm" --overwrite
@@ -78,6 +92,24 @@ jobs:
             "meta.helm.sh/release-name=retailos" \
             "meta.helm.sh/release-namespace=retail-app" --overwrite
         fi
+
+    - name: Sync secrets from GCP Secret Manager (dev)
+      run: |
+        DB_URL=$(gcloud secrets versions access latest --secret=dev-db-url --project=retail-mvp-dev)
+        JWT_KEY=$(gcloud secrets versions access latest --secret=dev-jwt-key --project=retail-mvp-dev)
+
+        kubectl create secret generic retailos-secrets \
+          --from-literal=db-url="${DB_URL}" \
+          --from-literal=jwt-key="${JWT_KEY}" \
+          -n retail-app \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+        kubectl label secret retailos-secrets -n retail-app \
+          "app.kubernetes.io/managed-by=Helm" --overwrite
+        kubectl annotate secret retailos-secrets -n retail-app \
+          "meta.helm.sh/release-name=retailos" \
+          "meta.helm.sh/release-namespace=retail-app" --overwrite
+
     - name: Deploy via Helm (dev)
       run: |
         helm upgrade --install retailos ./helm/retailos \
@@ -89,12 +121,16 @@ jobs:
           --set frontend.image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} \
           --atomic \
           --timeout 10m
+
     - name: Verify dev rollout
       run: |
         kubectl rollout status deployment/backend  -n retail-app --timeout=8m
         kubectl rollout status deployment/frontend -n retail-app --timeout=8m
         kubectl get pods -n retail-app
 
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Build and deploy to PROD (main branch only)
+  # ────────────────────────────────────────────────────────────────────────────
   deploy-prod:
     name: Build and Deploy (prod)
     runs-on: ubuntu-latest
@@ -105,29 +141,36 @@ jobs:
     env:
       PROJECT_ID: retail-mvp-prod
       WIF_SERVICE_ACCOUNT: gke-app-sa@retail-mvp-prod.iam.gserviceaccount.com
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
     - name: Install Helm
       uses: azure/setup-helm@v4
       with:
         version: v3.14.0
+
     - name: Lint Helm chart
       run: |
         helm lint helm/retailos \
           -f helm/retailos/values.yaml \
           -f helm/retailos/values-prod.yaml
+
     - name: Authenticate to GCP (prod)
       uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: ${{ env.WIF_PROVIDER }}
         service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
     - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ env.PROJECT_ID }}
+
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
     - name: Build and push frontend image
       run: |
         IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend
@@ -135,6 +178,7 @@ jobs:
         docker tag  ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
         docker push ${IMAGE}:${{ github.sha }}
         docker push ${IMAGE}:latest
+
     - name: Build and push backend image
       run: |
         IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend
@@ -142,18 +186,21 @@ jobs:
         docker tag  ${IMAGE}:${{ github.sha }} ${IMAGE}:latest
         docker push ${IMAGE}:${{ github.sha }}
         docker push ${IMAGE}:latest
+
     - name: Get GKE credentials (prod)
       uses: google-github-actions/get-gke-credentials@v2
       with:
         cluster_name: ${{ env.GKE_CLUSTER }}
         location: ${{ env.GKE_REGION }}
         project_id: ${{ env.PROJECT_ID }}
+
     - name: Bootstrap namespace and service account
       run: |
         kubectl create namespace retail-app --dry-run=client -o yaml | kubectl apply -f -
         kubectl create serviceaccount gke-app-ksa -n retail-app --dry-run=client -o yaml | kubectl apply -f -
         kubectl annotate serviceaccount gke-app-ksa -n retail-app \
           iam.gke.io/gcp-service-account=gke-app-sa@retail-mvp-prod.iam.gserviceaccount.com --overwrite
+
         if kubectl get secret retailos-secrets -n retail-app &>/dev/null; then
           kubectl label secret retailos-secrets -n retail-app \
             "app.kubernetes.io/managed-by=Helm" --overwrite
@@ -161,6 +208,24 @@ jobs:
             "meta.helm.sh/release-name=retailos" \
             "meta.helm.sh/release-namespace=retail-app" --overwrite
         fi
+
+    - name: Sync secrets from GCP Secret Manager (prod)
+      run: |
+        DB_URL=$(gcloud secrets versions access latest --secret=prod-db-url --project=retail-mvp-prod)
+        JWT_KEY=$(gcloud secrets versions access latest --secret=prod-jwt-key --project=retail-mvp-prod)
+
+        kubectl create secret generic retailos-secrets \
+          --from-literal=db-url="${DB_URL}" \
+          --from-literal=jwt-key="${JWT_KEY}" \
+          -n retail-app \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+        kubectl label secret retailos-secrets -n retail-app \
+          "app.kubernetes.io/managed-by=Helm" --overwrite
+        kubectl annotate secret retailos-secrets -n retail-app \
+          "meta.helm.sh/release-name=retailos" \
+          "meta.helm.sh/release-namespace=retail-app" --overwrite
+
     - name: Deploy via Helm (prod)
       run: |
         helm upgrade --install retailos ./helm/retailos \
@@ -172,6 +237,7 @@ jobs:
           --set frontend.image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }} \
           --atomic \
           --timeout 10m
+
     - name: Verify prod rollout
       run: |
         kubectl rollout status deployment/backend  -n retail-app --timeout=8m

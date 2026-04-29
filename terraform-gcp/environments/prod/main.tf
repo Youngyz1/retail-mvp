@@ -51,3 +51,10 @@ module "secretmanager" {
   db_url       = var.db_url
   jwt_key      = var.jwt_key
 }
+
+module "monitoring" {
+  source           = "../../modules/monitoring"
+  project_id       = var.project_id
+  slack_channel    = var.slack_channel
+  slack_auth_token = var.slack_auth_token
+}

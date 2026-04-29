@@ -8,3 +8,11 @@ metadata:
 spec:
   securityPolicy:
     name: {{ .Values.ingress.cloudArmorPolicy }}
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /health
+    port: 8080

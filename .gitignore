@@ -23,3 +23,11 @@ frontend/node_modules/
 terraform-gcp/environments/prod/terraform.tfvars
 argocd.exe
 *.tfvars
+*.tfstate
+*.tfstate.backup
+*.tfstate.*
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
