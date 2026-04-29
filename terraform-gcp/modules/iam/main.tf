@@ -28,6 +28,13 @@ resource "google_project_iam_member" "sa_container_developer" {
   member  = "serviceAccount:${google_service_account.gke_sa.email}"
 }
 
+# Required for GKE node logging, monitoring and HPA
+resource "google_project_iam_member" "sa_default_node_sa" {
+  project = var.project_id
+  role    = "roles/container.defaultNodeServiceAccount"
+  member  = "serviceAccount:${google_service_account.gke_sa.email}"
+}
+
 resource "google_service_account_iam_member" "wif_binding" {
   service_account_id = google_service_account.gke_sa.name
   role               = "roles/iam.workloadIdentityUser"
@@ -40,9 +47,16 @@ resource "google_service_account_iam_member" "token_creator" {
   member             = "principalSet://iam.googleapis.com/projects/1058692805920/locations/global/workloadIdentityPools/github-pool/attribute.repository/Youngyz1/retail-mvp"
 }
 
-
-resource "google_service_account_iam_member" "ksa_binding" {
+# Dev cluster KSA binding
+resource "google_service_account_iam_member" "ksa_binding_dev" {
   service_account_id = google_service_account.gke_sa.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:retail-mvp-dev.svc.id.goog[retail-app/gke-app-ksa]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[retail-app/gke-app-ksa]"
+}
+
+# Prod cluster KSA binding
+resource "google_service_account_iam_member" "ksa_binding_prod" {
+  service_account_id = google_service_account.gke_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:retail-mvp-prod.svc.id.goog[retail-app/gke-app-ksa]"
 }
